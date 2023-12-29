@@ -13,6 +13,7 @@ class Ball(Widget):
             # Set the initial position of the ball at the center of the screen
             self.ball = Ellipse(pos=(self.center_x - 25, self.center_y - 25), size=(50, 50))
 
+        self.velocity_x = 0  # Initial horizontal velocity
         self.velocity_y = 0  # Initial vertical velocity
         self.gravity = 1  # Gravity force
 
@@ -20,8 +21,8 @@ class Ball(Widget):
         # Apply gravity to the vertical velocity
         self.velocity_y -= self.gravity
 
-        # Move the ball vertically
-        self.ball.pos = (self.ball.pos[0], self.ball.pos[1] + self.velocity_y)
+        # Move the ball horizontally and vertically
+        self.ball.pos = (self.ball.pos[0] + self.velocity_x, self.ball.pos[1] + self.velocity_y)
 
         # Bounce when the ball hits the bottom of the screen
         if self.ball.pos[1] < 0:
@@ -29,8 +30,10 @@ class Ball(Widget):
             self.velocity_y = -self.velocity_y * 0.5  # Bounce with some dampening
 
     def on_touch_move(self, touch):
+        # Adjust the horizontal velocity based on the touch movement
+        self.velocity_x = touch.dx / 5  # You can adjust the division factor for the sensitivity
         # Adjust the vertical velocity based on the mouse movement
-        self.velocity_y = (touch.dy / 0.5)  # You can adjust the division factor for the sensitivity
+        self.velocity_y = touch.dy / 5  # You can adjust the division factor for the sensitivity
 
 class BallApp(App):
     def build(self):
