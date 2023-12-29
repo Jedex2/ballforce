@@ -1,18 +1,17 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.label import Label
-from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Ellipse, Color
 from kivy.clock import Clock
-
 
 class Ball(Widget):
     def __init__(self, **kwargs):
         super(Ball, self).__init__(**kwargs)
         with self.canvas:
             Color(1, 0, 0, 1)  # Set color (red in RGBA)
-            self.ball = Ellipse(pos=self.center, size=(50, 50))  # Initial size and position
+            # Set the initial position of the ball at the center of the screen
+            self.ball = Ellipse(pos=(self.center_x - 25, self.center_y - 25), size=(50, 50))
 
         self.velocity_y = 0  # Initial vertical velocity
         self.gravity = 1  # Gravity force
@@ -27,19 +26,18 @@ class Ball(Widget):
         # Bounce when the ball hits the bottom of the screen
         if self.ball.pos[1] < 0:
             self.ball.pos = (self.ball.pos[0], 0)
-            self.velocity_y = -self.velocity_y * 0.8  # Bounce with some dampening
+            self.velocity_y = -self.velocity_y * 0.5  # Bounce with some dampening
 
-    def on_touch_down(self, touch):
-        # Increase the vertical velocity when the screen is touched
-        self.velocity_y += 20
-
+    def on_touch_move(self, touch):
+        # Adjust the vertical velocity based on the mouse movement
+        self.velocity_y = (touch.dy / 0.5)  # You can adjust the division factor for the sensitivity
 
 class BallApp(App):
     def build(self):
         root = BoxLayout(orientation='vertical')
 
         self.ball = Ball()
-        self.label = Label(text='Tap the screen to make the ball jump!', font_size='20sp')
+        self.label = Label(text='Move the mouse to throw the ball!', font_size='20sp')
 
         root.add_widget(self.label)
         root.add_widget(self.ball)
@@ -52,7 +50,6 @@ class BallApp(App):
     def update(self, dt):
         # Update the ball's position
         self.ball.update(dt)
-
 
 if __name__ == '__main__':
     BallApp().run()
