@@ -24,6 +24,16 @@ class Ball(Widget):
         # Move the ball horizontally and vertically
         self.ball.pos = (self.ball.pos[0] + self.velocity_x, self.ball.pos[1] + self.velocity_y)
 
+        # Bounce off the left edge
+        if self.ball.pos[0] < 0:
+            self.ball.pos = (0, self.ball.pos[1])
+            self.velocity_x = -self.velocity_x
+
+        # Bounce off the right edge
+        if self.ball.pos[0] > self.width - 50:  # Adjust 50 based on the ball size
+            self.ball.pos = (self.width - 50, self.ball.pos[1])
+            self.velocity_x = -self.velocity_x
+
         # Bounce when the ball hits the bottom of the screen
         if self.ball.pos[1] < 0:
             self.ball.pos = (self.ball.pos[0], 0)
