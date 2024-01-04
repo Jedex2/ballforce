@@ -16,6 +16,7 @@ class Ball(Widget):
         self.velocity_y = 0  # Initial vertical velocity
         self.gravity = 1  # Gravity force
         self.damping = 0.9  # Damping factor for reducing velocity on each bounce
+        self.bounce_count = 0  # Initialize bounce count
 
     def update(self, dt):
         # Apply gravity to the vertical velocity
@@ -27,19 +28,22 @@ class Ball(Widget):
         # Bounce off the left edge
         if self.ball.pos[0] < 0:
             self.ball.pos = (0, self.ball.pos[1])
-            self.velocity_x = (-self.velocity_x * self.damping)/2  # Apply damping
+            self.velocity_x = (-self.velocity_x * self.damping) / 2  # Apply damping
+            self.on_side_bounce()
 
         # Bounce off the right edge
         if self.ball.pos[0] > self.width - 50:  # Adjust 50 based on the ball size
             self.ball.pos = (self.width - 50, self.ball.pos[1])
-            self.velocity_x = (-self.velocity_x * self.damping)/2  # Apply damping
+            self.velocity_x = (-self.velocity_x * self.damping) / 2  # Apply damping
+            self.on_side_bounce()
 
         # Bounce when the ball hits the bottom of the screen
         if self.ball.pos[1] < 0:
             self.ball.pos = (self.ball.pos[0], 0)
             self.velocity_y = -self.velocity_y * self.damping  # Bounce with damping
 
-
+    def on_side_bounce(self):
+        self.bounce_count += 1
 
     def on_touch_move(self, touch):
         # Adjust the horizontal velocity based on the touch movement
@@ -52,7 +56,7 @@ class BallApp(App):
         root = BoxLayout(orientation='vertical')
 
         self.ball = Ball()
-        self.label = Label(text='Move the mouse to throw the ball!', font_size='20sp')
+        self.label = Label(text='Bounce Count: 0', font_size='20sp')
 
         root.add_widget(self.label)
         root.add_widget(self.ball)
@@ -65,6 +69,9 @@ class BallApp(App):
     def update(self, dt):
         # Update the ball's position
         self.ball.update(dt)
+
+        # Update the label with the current bounce count
+        self.label.text = f'Bounce Count: {self.ball.bounce_count}'
 
 if __name__ == '__main__':
     BallApp().run()
