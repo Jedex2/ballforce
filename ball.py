@@ -4,13 +4,16 @@ from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Ellipse, Color
 from kivy.clock import Clock
+from kivy.utils import get_color_from_hex
+import random
 
 class Ball(Widget):
     def __init__(self, **kwargs):
         super(Ball, self).__init__(**kwargs)
         with self.canvas:
-            Color(1, 0, 0, 1)  # Set color (red in RGBA) for the ball
+            self.ball_color = Color(1, 0, 0, 1)  # Set color (red in RGBA) for the ball
             self.ball = Ellipse(pos=(self.center_x - 25, self.center_y - 25), size=(50, 50))
+            self.canvas.add(self.ball_color)
 
         self.velocity_x = 0  # Initial horizontal velocity
         self.velocity_y = 0  # Initial vertical velocity
@@ -44,6 +47,14 @@ class Ball(Widget):
 
     def on_side_bounce(self):
         self.bounce_count += 1
+        if self.bounce_count == 10:
+            self.change_ball_color()
+
+    def change_ball_color(self):
+        # Change ball color to a random color
+        random_color = [random.random() for _ in range(3)] + [1]
+        self.ball_color.rgba = random_color
+        self.bounce_count = 0  # Reset bounce count after color change
 
     def on_touch_move(self, touch):
         # Adjust the horizontal velocity based on the touch movement
@@ -56,7 +67,7 @@ class BallApp(App):
         root = BoxLayout(orientation='vertical')
 
         self.ball = Ball()
-        self.label = Label(text='Bounce Count: 0', font_size='20sp')
+        self.label = Label(text='Move the mouse to throw the ball!\nBounce Count: 0', font_size='20sp')
 
         root.add_widget(self.label)
         root.add_widget(self.ball)
@@ -71,7 +82,7 @@ class BallApp(App):
         self.ball.update(dt)
 
         # Update the label with the current bounce count
-        self.label.text = f'Bounce Count: {self.ball.bounce_count}'
+        self.label.text = f'Move the mouse to throw the ball!\nBounce Count: {self.ball.bounce_count}'
 
 if __name__ == '__main__':
     BallApp().run()
