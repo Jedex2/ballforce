@@ -31,13 +31,13 @@ class Ball(Widget):
         # Bounce off the left edge
         if self.ball.pos[0] < 0:
             self.ball.pos = (0, self.ball.pos[1])
-            self.velocity_x = (-self.velocity_x * self.damping) / 2  # Apply damping
+            self.velocity_x = (-self.velocity_x * self.damping) /2  # Apply damping
             self.on_side_bounce()
 
         # Bounce off the right edge
         if self.ball.pos[0] > self.width - 50:  # Adjust 50 based on the ball size
             self.ball.pos = (self.width - 50, self.ball.pos[1])
-            self.velocity_x = (-self.velocity_x * self.damping) / 2  # Apply damping
+            self.velocity_x = (-self.velocity_x * self.damping) /2  # Apply damping
             self.on_side_bounce()
 
         # Bounce when the ball hits the bottom of the screen
@@ -47,14 +47,13 @@ class Ball(Widget):
 
     def on_side_bounce(self):
         self.bounce_count += 1
-        if self.bounce_count == 10:
+        if self.bounce_count % 10 == 0 or self.bounce_count >= 100:
             self.change_ball_color()
 
     def change_ball_color(self):
         # Change ball color to a random color
         random_color = [random.random() for _ in range(3)] + [1]
         self.ball_color.rgba = random_color
-        self.bounce_count = 0  # Reset bounce count after color change
 
     def on_touch_move(self, touch):
         # Adjust the horizontal velocity based on the touch movement
@@ -83,6 +82,11 @@ class BallApp(App):
 
         # Update the label with the current bounce count
         self.label.text = f'Move the mouse to throw the ball!\nBounce Count: {self.ball.bounce_count}'
+
+        # Change text color randomly if bounce count exceeds 200
+        if self.ball.bounce_count > 200:
+            random_color = [random.random() for _ in range(3)] + [1]
+            self.label.color = random_color
 
 if __name__ == '__main__':
     BallApp().run()
