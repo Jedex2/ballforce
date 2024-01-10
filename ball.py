@@ -23,7 +23,7 @@ class Ball(Widget):
         self.velocity_x = 0  # Initial horizontal velocity
         self.velocity_y = 0  # Initial vertical velocity
         self.gravity = 1  # Gravity force
-        self.damping = 0.9  # Damping factor for reducing velocity on each bounce
+        self.damping = 0.85  # Damping factor for reducing velocity on each bounce
         self.bounce_count = 0  # Initialize bounce count
 
     def update(self, dt):
@@ -64,9 +64,7 @@ class BallApp(App):
         root = BoxLayout(orientation='vertical')
 
         self.ball = Ball()
-        self.label = Label(text='Move the mouse to throw the ball!\nBounce Count: 0', font_size='20sp')
 
-        root.add_widget(self.label)
         root.add_widget(self.ball)
 
         # Schedule the update function to be called every 1/60 seconds (60 FPS)
@@ -78,8 +76,7 @@ class BallApp(App):
         # Update the ball's position
         self.ball.update(dt)
 
-        # Update the label with the current bounce count
-        self.label.text = f'Move the mouse to throw the ball!\nBounce Count: {self.ball.bounce_count}'
+
 
         # Change text color randomly if bounce count exceeds 200
         if self.ball.bounce_count > 200:
