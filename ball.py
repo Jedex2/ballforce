@@ -39,8 +39,8 @@ class Ball(Widget):
             self.velocity_y = -self.velocity_y * self.damping  # Bounce with damping
 
         # Bounce off the top edge
-        if self.ball.pos[1] > self.height :  # Adjust 50 based on the ball size
-            self.ball.pos = (self.ball.pos[0], self.height )
+        if self.ball.pos[1] > self.height*2 :  # Adjust 50 based on the ball size
+            self.ball.pos = (self.ball.pos[0], self.height*2 )
             self.velocity_y = -self.velocity_y * self.damping  # Bounce with damping
 
         # Bounce off the left edge
