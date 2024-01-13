@@ -1,10 +1,10 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
+from kivy.uix.image import Image
 from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Ellipse, Color
 from kivy.clock import Clock
-from kivy.utils import get_color_from_hex
+from kivy.core.window import Window
 import random
 
 class Ball(Widget):
@@ -35,8 +35,8 @@ class Ball(Widget):
             self.on_side_bounce()
 
         # Bounce off the right edge
-        if self.ball.pos[0] > self.width - 50:  # Adjust 50 based on the ball size
-            self.ball.pos = (self.width - 50, self.ball.pos[1])
+        if self.ball.pos[0] > Window.width - 50:  # Adjust 50 based on the ball size
+            self.ball.pos = (Window.width - 50, self.ball.pos[1])
             self.velocity_x = (-self.velocity_x * self.damping) / 2  # Apply damping
             self.on_side_bounce()
 
@@ -61,34 +61,19 @@ class Ball(Widget):
         # Adjust the vertical velocity based on the mouse movement
         self.velocity_y = touch.dy / 2.5  # You can adjust the division factor for sensitivity
 
-class SecondBall(Widget):
-    def __init__(self, **kwargs):
-        super(SecondBall, self).__init__(**kwargs)
-        with self.canvas:
-            self.ball_color = Color(0, 0, 1, 1)  # Set color (blue in RGBA) for the second ball
-            self.ball = Ellipse(pos=(self.center_x - 25, self.center_y - 25), size=(50, 50))
-            self.canvas.add(self.ball_color)
-
-        self.velocity_x = 0  # Initial horizontal velocity
-        self.velocity_y = 0  # Initial vertical velocity
-
-    def update(self, dt):
-        # Update the position of the second ball
-        self.ball.pos = (self.ball.pos[0] + self.velocity_x, self.ball.pos[1] + self.velocity_y)
-
-        # Additional logic for bouncing or any other behavior can be added here if needed
-
 class BallApp(App):
     def build(self):
-        root = BoxLayout(orientation='vertical')
+        root = Widget()
+
+        # Add a background image to fill the entire screen
+        background = Image(source='snowweather.jpg', allow_stretch=True, keep_ratio=False, size=(Window.width, Window.height))
+        root.add_widget(background)
 
         self.ball = Ball()
-        self.second_ball = SecondBall()
         self.label = Label(text='Move the mouse to throw the ball!\nBounce Count: 0', font_size='20sp')
 
         root.add_widget(self.label)
         root.add_widget(self.ball)
-        root.add_widget(self.second_ball)
 
         # Schedule the update function to be called every 1/60 seconds (60 FPS)
         Clock.schedule_interval(self.update, 1.0 / 60.0)
@@ -96,9 +81,8 @@ class BallApp(App):
         return root
 
     def update(self, dt):
-        # Update the position of both balls
+        # Update the ball's position
         self.ball.update(dt)
-        self.second_ball.update(dt)
 
         # Update the label with the current bounce count
         self.label.text = f'Move the mouse to throw the ball!\nBounce Count: {self.ball.bounce_count}'
