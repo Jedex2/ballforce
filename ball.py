@@ -10,21 +10,42 @@ from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.uix.settings import SettingsWithSidebar
 from kivy.uix.dropdown import DropDown
+from kivy.core.audio import SoundLoader
 import random
 
 class Ball(Widget):
     def __init__(self, **kwargs):
         super(Ball, self).__init__(**kwargs)
-        with self.canvas:
-            self.ball_color = Color(1, 0, 0, 1)  # Set color (red in RGBA) for the ball
-            self.ball = Ellipse(pos=(self.center_x - 25, self.center_y - 25), size=(50, 50))
-            self.canvas.add(self.ball_color)
-
+        self.bounce_sound = None  # Initialize bounce sound to None
+        self.bounce_count = 0  # Initialize bounce count
         self.velocity_x = 0  # Initial horizontal velocity
         self.velocity_y = 0  # Initial vertical velocity
         self.gravity = 1  # Gravity force
         self.damping = 0.9  # Damping factor for reducing velocity on each bounce
-        self.bounce_count = 0  # Initialize bounce count
+
+        # Load the initial bounce sound (icebounce.mp3)
+        self.bounce_sound = SoundLoader.load('icebounce.mp3')
+
+        with self.canvas:
+            self.ball_color = Color(0, 1, 1, 1)  # Set color (cyan in RGBA) for the ice ball
+            self.ball = Ellipse(pos=(self.center_x - 25, self.center_y - 25), size=(50, 50))
+            self.canvas.add(self.ball_color)
+
+    def set_bounce_sound(self, sound_file):
+        # Load the bounce sound effect
+        self.bounce_sound = SoundLoader.load(sound_file) if sound_file else None
+
+    def on_side_bounce(self):
+        self.bounce_count += 1
+        self.change_ball_color()
+        if self.bounce_sound:
+            self.bounce_sound.volume = 1.0  # Adjust the volume (0.0 to 1.0)
+            self.bounce_sound.play()
+
+    def change_ball_color(self):
+        # Change ball color to a random color
+        random_color = [random.random() for _ in range(3)] + [1]
+        self.ball_color.rgba = random_color
 
     def update(self, dt):
         # Apply gravity to the vertical velocity
@@ -49,16 +70,6 @@ class Ball(Widget):
         if self.ball.pos[1] < 0:
             self.ball.pos = (self.ball.pos[0], 0)
             self.velocity_y = -self.velocity_y * self.damping  # Bounce with damping
-
-    def on_side_bounce(self):
-        self.bounce_count += 1
-        if self.bounce_count % 10 == 0 or self.bounce_count >= 100:
-            self.change_ball_color()
-
-    def change_ball_color(self):
-        # Change ball color to a random color
-        random_color = [random.random() for _ in range(3)] + [1]
-        self.ball_color.rgba = random_color
 
     def on_touch_move(self, touch):
         # Adjust the horizontal velocity based on the touch movement
@@ -96,7 +107,49 @@ class BallApp(App):
         # Schedule the update function to be called every 1/60 seconds (60 FPS)
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 
+        # Load sound effect for the ice ball (initial skin)
+        self.ice_hit_sound = SoundLoader.load('icebounce.mp3')
+        self.ball.set_bounce_sound('icebounce.mp3')  # Set initial bounce sound for the ice ball
+
         return root
+
+    def show_skin_popup(self, instance):
+        # Create a skin selection popup
+        content = BoxLayout(orientation='vertical')
+
+        def set_skin(instance, value):
+            self.change_skin(value)
+
+        skin_options = ['Ice Ball', 'Green', 'Blue']
+        skin_dropdown = DropDown()
+        for skin_option in skin_options:
+            btn = Button(text=skin_option, size_hint_y=None, height=44)
+            btn.bind(on_release=lambda btn: skin_dropdown.select(btn.text))
+            skin_dropdown.add_widget(btn)
+
+        skin_button = Button(text='Select Skin', size_hint=(None, None), height=44)
+        skin_button.bind(on_release=skin_dropdown.open)
+        skin_dropdown.bind(on_select=lambda instance, x: set_skin(instance, x))
+        content.add_widget(skin_button)
+
+        popup = Popup(title='Skin Selection', content=content, size_hint=(None, None), size=(300, 150))
+        popup.open()
+
+    def change_skin(self, skin_option):
+        # Change ball appearance based on the selected option
+        if skin_option == 'Ice Ball':
+            self.ball.ball_color.rgba = [0, 1, 1, 1]  # Cyan color for the ice ball
+            self.ball.set_bounce_sound('icebounce.mp3')  # Set bounce sound for the ice ball
+        elif skin_option == 'Green':
+            self.ball.ball_color.rgba = [0, 1, 0, 1]  # Green color
+            self.ball.set_bounce_sound(None)  # No special sound for the green ball
+        elif skin_option == 'Blue':
+            self.ball.ball_color.rgba = [0, 0, 1, 1]  # Blue color
+            self.ball.set_bounce_sound(None)  # No special sound for the blue ball
+
+    def update(self, dt):
+        # Update the ball's position
+        self.ball.update(dt)
 
     def show_background_popup(self, instance):
         # Create a background selection popup
@@ -126,46 +179,6 @@ class BallApp(App):
             self.background.source = 'snowweather.jpg'
         elif background_option == 'forest':
             self.background.source = 'forest.jpg'
-
-    def show_skin_popup(self, instance):
-        # Create a skin selection popup
-        content = BoxLayout(orientation='vertical')
-
-        def set_skin(instance, value):
-            self.change_skin(value)
-
-        skin_options = ['red', 'green', 'blue']
-        skin_dropdown = DropDown()
-        for skin_option in skin_options:
-            btn = Button(text=skin_option, size_hint_y=None, height=44)
-            btn.bind(on_release=lambda btn: skin_dropdown.select(btn.text))
-            skin_dropdown.add_widget(btn)
-
-        skin_button = Button(text='Select Skin', size_hint=(None, None), height=44)
-        skin_button.bind(on_release=skin_dropdown.open)
-        skin_dropdown.bind(on_select=lambda instance, x: set_skin(instance, x))
-        content.add_widget(skin_button)
-
-        popup = Popup(title='Skin Selection', content=content, size_hint=(None, None), size=(300, 150))
-        popup.open()
-
-    def change_skin(self, skin_option):
-        # Change ball color based on the selected option
-        if skin_option == 'red':
-            self.ball.ball_color.rgba = [1, 0, 0, 1]  # Red color
-        elif skin_option == 'green':
-            self.ball.ball_color.rgba = [0, 1, 0, 1]  # Green color
-        elif skin_option == 'blue':
-            self.ball.ball_color.rgba = [0, 0, 1, 1]  # Blue color
-
-    def update(self, dt):
-        # Update the ball's position
-        self.ball.update(dt)
-
-        # Change text color randomly if bounce count exceeds 200
-        if self.ball.bounce_count > 200:
-            random_color = [random.random() for _ in range(3)] + [1]
-            self.label.color = random_color
 
 if __name__ == '__main__':
     BallApp().run()
