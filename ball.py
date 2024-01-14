@@ -37,7 +37,7 @@ class Ball(Widget):
 
     def play_bounce_sound(self):
         if self.bounce_sound:
-            self.bounce_sound.volume = 1.0  # Adjust the volume (0.0 to 1.0)
+            self.bounce_sound.volume = 0.5  # Adjust the volume (0.0 to 1.0)
             self.bounce_sound.play()
 
     def on_side_bounce(self, skin_color):
