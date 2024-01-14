@@ -77,9 +77,9 @@ class Ball(Widget):
 
     def on_touch_move(self, touch):
         # Adjust the horizontal velocity based on the touch movement
-        self.velocity_x = touch.dx / 2.5  # You can adjust the division factor for sensitivity
+        self.velocity_x = touch.dx / 3  # You can adjust the division factor for sensitivity
         # Adjust the vertical velocity based on the mouse movement
-        self.velocity_y = touch.dy / 2.5  # You can adjust the division factor for sensitivity
+        self.velocity_y = touch.dy / 3  # You can adjust the division factor for sensitivity
 
 class BallSettings(SettingsWithSidebar):
     pass
