@@ -35,17 +35,16 @@ class Ball(Widget):
         # Load the bounce sound effect
         self.bounce_sound = SoundLoader.load(sound_file) if sound_file else None
 
-    def on_side_bounce(self):
+    def on_side_bounce(self, skin_color):
         self.bounce_count += 1
-        self.change_ball_color()
+        self.change_ball_color(skin_color)
         if self.bounce_sound:
             self.bounce_sound.volume = 1.0  # Adjust the volume (0.0 to 1.0)
             self.bounce_sound.play()
 
-    def change_ball_color(self):
-        # Change ball color to a random color
-        random_color = [random.random() for _ in range(3)] + [1]
-        self.ball_color.rgba = random_color
+    def change_ball_color(self, skin_color):
+        # Change ball color to the selected skin color
+        self.ball_color.rgba = skin_color
 
     def update(self, dt):
         # Apply gravity to the vertical velocity
@@ -58,13 +57,13 @@ class Ball(Widget):
         if self.ball.pos[0] < 0:
             self.ball.pos = (0, self.ball.pos[1])
             self.velocity_x = (-self.velocity_x * self.damping) / 2  # Apply damping
-            self.on_side_bounce()
+            self.on_side_bounce(self.ball_color.rgba)
 
         # Bounce off the right edge
         if self.ball.pos[0] > Window.width - 50:  # Adjust 50 based on the ball size
             self.ball.pos = (Window.width - 50, self.ball.pos[1])
             self.velocity_x = (-self.velocity_x * self.damping) / 2  # Apply damping
-            self.on_side_bounce()
+            self.on_side_bounce(self.ball_color.rgba)
 
         # Bounce when the ball hits the bottom of the screen
         if self.ball.pos[1] < 0:
@@ -138,14 +137,17 @@ class BallApp(App):
     def change_skin(self, skin_option):
         # Change ball appearance based on the selected option
         if skin_option == 'Ice Ball':
-            self.ball.ball_color.rgba = [0, 1, 1, 1]  # Cyan color for the ice ball
+            skin_color = [0, 1, 1, 1]  # Cyan color for the ice ball
             self.ball.set_bounce_sound('icebounce.mp3')  # Set bounce sound for the ice ball
         elif skin_option == 'Green':
-            self.ball.ball_color.rgba = [0, 1, 0, 1]  # Green color
+            skin_color = [0, 1, 0, 1]  # Green color
             self.ball.set_bounce_sound(None)  # No special sound for the green ball
         elif skin_option == 'Blue':
-            self.ball.ball_color.rgba = [0, 0, 1, 1]  # Blue color
+            skin_color = [0, 0, 1, 1]  # Blue color
             self.ball.set_bounce_sound(None)  # No special sound for the blue ball
+
+        self.ball.change_ball_color(skin_color)  # Update ball color
+        self.ball.on_side_bounce(skin_color)  # Trigger bounce with updated color
 
     def update(self, dt):
         # Update the ball's position
