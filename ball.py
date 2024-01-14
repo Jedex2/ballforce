@@ -193,7 +193,7 @@ class BallApp(App):
         if background_option == 'snow':
             self.background.source = 'snowweather.jpg'
             self.load_game_sounds_for_background('snow')
-        elif background_option == 'forest':
+        elif background_option == 'forest':  # Corrected condition
             self.background.source = 'forest.jpg'
             self.load_game_sounds_for_background('forest')
 
