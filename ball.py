@@ -1,7 +1,6 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.image import Image
-from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.slider import Slider
@@ -9,6 +8,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Ellipse, Color
 from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.uix.settings import SettingsWithSidebar
+from kivy.uix.dropdown import DropDown
 import random
 
 class Ball(Widget):
@@ -65,41 +66,97 @@ class Ball(Widget):
         # Adjust the vertical velocity based on the mouse movement
         self.velocity_y = touch.dy / 2.5  # You can adjust the division factor for sensitivity
 
+class BallSettings(SettingsWithSidebar):
+    pass
+
 class BallApp(App):
     def build(self):
+        self.settings_cls = BallSettings
+        self.use_kivy_settings = False  # Disable default settings panel
+
         root = Widget()
 
         # Add a background image to fill the entire screen
-        background = Image(source='snowweather.jpg', allow_stretch=True, keep_ratio=False, size=(Window.width, Window.height))
-        root.add_widget(background)
+        self.background = Image(source='snowweather.jpg', allow_stretch=True, keep_ratio=False, size=(Window.width, Window.height))
+        root.add_widget(self.background)
 
         self.ball = Ball()
         root.add_widget(self.ball)
 
-        # Add settings button in the top-right corner
-        settings_button = Button(text='Settings', size_hint=(None, None), pos=(Window.width - 110, Window.height - 50), size=(100, 50))
-        settings_button.bind(on_release=self.show_settings_popup)
-        root.add_widget(settings_button)
+        # Add theme selection button in the top-left corner
+        background_button = Button(text='Background', size_hint=(None, None), pos=(10, Window.height - 50), size=(100, 50))
+        background_button.bind(on_release=self.show_background_popup)
+        root.add_widget(background_button)
+
+        # Add skin selection button in the top-right corner
+        skin_button = Button(text='Skin', size_hint=(None, None), pos=(Window.width - 110, Window.height - 50), size=(100, 50))
+        skin_button.bind(on_release=self.show_skin_popup)
+        root.add_widget(skin_button)
 
         # Schedule the update function to be called every 1/60 seconds (60 FPS)
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 
         return root
 
-    def show_settings_popup(self, instance):
-        # Create a settings popup
+    def show_background_popup(self, instance):
+        # Create a background selection popup
         content = BoxLayout(orientation='vertical')
-        damping_slider = Slider(min=0.1, max=1.0, value=self.ball.damping, step=0.1, size_hint=(None, None), width=200)
 
-        def on_damping_slider_change(instance, value):
-            self.ball.damping = value
+        def set_background(instance, value):
+            self.change_background(value)
 
-        damping_slider.bind(value=on_damping_slider_change)
-        content.add_widget(Label(text='Damping Factor'))
-        content.add_widget(damping_slider)
+        background_options = ['snow', 'forest']
+        background_dropdown = DropDown()
+        for background_option in background_options:
+            btn = Button(text=background_option, size_hint_y=None, height=44)
+            btn.bind(on_release=lambda btn: background_dropdown.select(btn.text))
+            background_dropdown.add_widget(btn)
 
-        popup = Popup(title='Settings', content=content, size_hint=(None, None), size=(300, 200))
+        background_button = Button(text='Select Background', size_hint=(None, None), height=44)
+        background_button.bind(on_release=background_dropdown.open)
+        background_dropdown.bind(on_select=lambda instance, x: set_background(instance, x))
+        content.add_widget(background_button)
+
+        popup = Popup(title='Background Selection', content=content, size_hint=(None, None), size=(300, 150))
         popup.open()
+
+    def change_background(self, background_option):
+        # Change background based on the selected option
+        if background_option == 'snow':
+            self.background.source = 'snowweather.jpg'
+        elif background_option == 'forest':
+            self.background.source = 'forest.jpg'
+
+    def show_skin_popup(self, instance):
+        # Create a skin selection popup
+        content = BoxLayout(orientation='vertical')
+
+        def set_skin(instance, value):
+            self.change_skin(value)
+
+        skin_options = ['red', 'green', 'blue']
+        skin_dropdown = DropDown()
+        for skin_option in skin_options:
+            btn = Button(text=skin_option, size_hint_y=None, height=44)
+            btn.bind(on_release=lambda btn: skin_dropdown.select(btn.text))
+            skin_dropdown.add_widget(btn)
+
+        skin_button = Button(text='Select Skin', size_hint=(None, None), height=44)
+        skin_button.bind(on_release=skin_dropdown.open)
+        skin_dropdown.bind(on_select=lambda instance, x: set_skin(instance, x))
+        content.add_widget(skin_button)
+
+        popup = Popup(title='Skin Selection', content=content, size_hint=(None, None), size=(300, 150))
+        popup.open()
+
+    def change_skin(self, skin_option):
+        # Change ball color based on the selected option
+        if skin_option == 'red':
+            self.ball.ball_color.rgba = [1, 0, 0, 1]  # Red color
+        elif skin_option == 'green':
+            self.ball.ball_color.rgba = [0, 1, 0, 1]  # Green color
+        elif skin_option == 'blue':
+            self.ball.ball_color.rgba = [0, 0, 1, 1]  # Blue color
 
     def update(self, dt):
         # Update the ball's position
