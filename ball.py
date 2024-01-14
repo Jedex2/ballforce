@@ -2,6 +2,10 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.image import Image
 from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.slider import Slider
+from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Ellipse, Color
 from kivy.clock import Clock
 from kivy.core.window import Window
@@ -70,22 +74,36 @@ class BallApp(App):
         root.add_widget(background)
 
         self.ball = Ball()
-        self.label = Label(text='Move the mouse to throw the ball!\nBounce Count: 0', font_size='20sp')
-
-        root.add_widget(self.label)
         root.add_widget(self.ball)
+
+        # Add settings button in the top-right corner
+        settings_button = Button(text='Settings', size_hint=(None, None), pos=(Window.width - 110, Window.height - 50), size=(100, 50))
+        settings_button.bind(on_release=self.show_settings_popup)
+        root.add_widget(settings_button)
 
         # Schedule the update function to be called every 1/60 seconds (60 FPS)
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 
         return root
 
+    def show_settings_popup(self, instance):
+        # Create a settings popup
+        content = BoxLayout(orientation='vertical')
+        damping_slider = Slider(min=0.1, max=1.0, value=self.ball.damping, step=0.1, size_hint=(None, None), width=200)
+
+        def on_damping_slider_change(instance, value):
+            self.ball.damping = value
+
+        damping_slider.bind(value=on_damping_slider_change)
+        content.add_widget(Label(text='Damping Factor'))
+        content.add_widget(damping_slider)
+
+        popup = Popup(title='Settings', content=content, size_hint=(None, None), size=(300, 200))
+        popup.open()
+
     def update(self, dt):
         # Update the ball's position
         self.ball.update(dt)
-
-        # Update the label with the current bounce count
-        self.label.text = f'Move the mouse to throw the ball!\nBounce Count: {self.ball.bounce_count}'
 
         # Change text color randomly if bounce count exceeds 200
         if self.ball.bounce_count > 200:
