@@ -24,23 +24,26 @@ class Ball(Widget):
         self.damping = 0.9  # Damping factor for reducing velocity on each bounce
 
         # Load the initial bounce sound (icebounce.mp3)
-        self.bounce_sound = SoundLoader.load('icebounce.mp3')
+        self.load_bounce_sound('icebounce.mp3')
 
         with self.canvas:
             self.ball_color = Color(0, 1, 1, 1)  # Set color (cyan in RGBA) for the ice ball
             self.ball = Ellipse(pos=(self.center_x - 25, self.center_y - 25), size=(50, 50))
             self.canvas.add(self.ball_color)
 
-    def set_bounce_sound(self, sound_file):
+    def load_bounce_sound(self, sound_file):
         # Load the bounce sound effect
         self.bounce_sound = SoundLoader.load(sound_file) if sound_file else None
+
+    def play_bounce_sound(self):
+        if self.bounce_sound:
+            self.bounce_sound.volume = 1.0  # Adjust the volume (0.0 to 1.0)
+            self.bounce_sound.play()
 
     def on_side_bounce(self, skin_color):
         self.bounce_count += 1
         self.change_ball_color(skin_color)
-        if self.bounce_sound:
-            self.bounce_sound.volume = 1.0  # Adjust the volume (0.0 to 1.0)
-            self.bounce_sound.play()
+        self.play_bounce_sound()
 
     def change_ball_color(self, skin_color):
         # Change ball color to the selected skin color
@@ -106,11 +109,21 @@ class BallApp(App):
         # Schedule the update function to be called every 1/60 seconds (60 FPS)
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 
-        # Load sound effect for the ice ball (initial skin)
-        self.ice_hit_sound = SoundLoader.load('icebounce.mp3')
-        self.ball.set_bounce_sound('icebounce.mp3')  # Set initial bounce sound for the ice ball
+        # Load background music
+        self.background_music = SoundLoader.load('background_music.mp3')
+        if self.background_music:
+            self.background_music.loop = True
+            self.background_music.play()
+
+        # Load sound effects for the game
+        self.load_game_sounds()
 
         return root
+
+    def load_game_sounds(self):
+        # Load additional game sounds
+        self.bounce_sound_2 = SoundLoader.load('autumnsound.mp3')
+        self.bounce_sound_3 = SoundLoader.load('cold.mp3')
 
     def show_skin_popup(self, instance):
         # Create a skin selection popup
@@ -138,13 +151,13 @@ class BallApp(App):
         # Change ball appearance based on the selected option
         if skin_option == 'Ice Ball':
             skin_color = [0, 1, 1, 1]  # Cyan color for the ice ball
-            self.ball.set_bounce_sound('icebounce.mp3')  # Set bounce sound for the ice ball
+            self.ball.load_bounce_sound('icebounce.mp3')
         elif skin_option == 'Green':
             skin_color = [0, 1, 0, 1]  # Green color
-            self.ball.set_bounce_sound(None)  # No special sound for the green ball
+            self.ball.load_bounce_sound('bounce_sound_2.mp3')
         elif skin_option == 'Blue':
             skin_color = [0, 0, 1, 1]  # Blue color
-            self.ball.set_bounce_sound(None)  # No special sound for the blue ball
+            self.ball.load_bounce_sound('bounce_sound_3.mp3')
 
         self.ball.change_ball_color(skin_color)  # Update ball color
         self.ball.on_side_bounce(skin_color)  # Trigger bounce with updated color
@@ -179,8 +192,19 @@ class BallApp(App):
         # Change background based on the selected option
         if background_option == 'snow':
             self.background.source = 'snowweather.jpg'
+            self.load_game_sounds_for_background('snow')
         elif background_option == 'forest':
             self.background.source = 'forest.jpg'
+            self.load_game_sounds_for_background('forest')
+
+    def load_game_sounds_for_background(self, background):
+        # Load game sounds based on the selected background
+        if background == 'snow':
+            self.bounce_sound_2 = SoundLoader.load('snow_bounce_sound.mp3')
+            self.bounce_sound_3 = SoundLoader.load('snow_bounce_sound_2.mp3')
+        elif background == 'forest':
+            self.bounce_sound_2 = SoundLoader.load('forest_bounce_sound.mp3')
+            self.bounce_sound_3 = SoundLoader.load('forest_bounce_sound_2.mp3')
 
 if __name__ == '__main__':
     BallApp().run()
