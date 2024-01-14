@@ -10,6 +10,7 @@ from kivy.core.window import Window
 from kivy.uix.settings import SettingsWithSidebar
 from kivy.uix.dropdown import DropDown
 from kivy.core.audio import SoundLoader
+from kivy.uix.image import AsyncImage  # Import AsyncImage
 import random
 
 class Ball(Widget):
@@ -113,10 +114,11 @@ class BallApp(App):
         self.load_game_sounds()
 
         return root
+
     def load_game_sounds(self):
         # Load additional game sounds
-        self.bounce_sound_2 = SoundLoader.load('cold.mp3')
         self.bounce_sound_3 = SoundLoader.load('autumnsound.mp3')
+        self.bounce_sound_2 = SoundLoader.load('cold.mp3')
 
     def show_skin_popup(self, instance):
         # Create a skin selection popup
@@ -125,11 +127,15 @@ class BallApp(App):
         def set_skin(instance, value):
             self.change_skin(value)
 
-        skin_options = ['Ice Ball', 'Green', 'Blue']
+        skin_options = ['Ice Ball', 'forest Ball', 'Lava ball']
+        skin_images = ['Ice ball.jpg', 'forest ball.png', 'lava ball.png']
+
         skin_dropdown = DropDown()
-        for skin_option in skin_options:
+
+        for skin_option, skin_image in zip(skin_options, skin_images):
             btn = Button(text=skin_option, size_hint_y=None, height=44)
-            btn.bind(on_release=lambda btn: skin_dropdown.select(btn.text))
+            img = AsyncImage(source=skin_image, size_hint_y=None, height=44)
+            btn.bind(on_release=lambda btn, img=img: skin_dropdown.select(img.source))
             skin_dropdown.add_widget(btn)
 
         skin_button = Button(text='Select Skin', size_hint=(None, None), height=44)
@@ -137,21 +143,20 @@ class BallApp(App):
         skin_dropdown.bind(on_select=lambda instance, x: set_skin(instance, x))
         content.add_widget(skin_button)
 
-        popup = Popup(title='Skin Selection', content=content, size_hint=(None, None), size=(300, 150))
+        popup = Popup(title='Skin Selection', content=content, size_hint=(None, None), size=(300, 200))
         popup.open()
 
     def change_skin(self, skin_option):
         # Change ball appearance based on the selected option
-        if skin_option == 'Ice Ball':
-            skin_color = [0, 1, 1, 1]  # Cyan color for the ice ball
-            self.ball.load_bounce_sound('icebounce.mp3')
-        elif skin_option == 'Green':
-            skin_color = [0, 1, 0, 1]  # Green color
-            self.ball.load_bounce_sound('bounce_sound_2.mp3')
-        elif skin_option == 'Blue':
-            skin_color = [0, 0, 1, 1]  # Blue color
-            self.ball.load_bounce_sound('bounce_sound_3.mp3')
+        skin_images = {
+            'Ice ball.png': [0, 1, 1, 1],
+            'forest ball.png': [0, 1, 0, 1],
+            'lava ball.png': [0, 0, 1, 1]
+        }
 
+        skin_color = skin_images.get(skin_option, [0, 1, 1, 1])
+
+        self.ball.load_bounce_sound(f'{skin_option}_bounce.mp3')  # Adjust sound file names accordingly
         self.ball.change_ball_color(skin_color)  # Update ball color
         self.ball.on_side_bounce(skin_color)  # Trigger bounce with updated color
 
@@ -196,7 +201,9 @@ class BallApp(App):
         # Load game sounds based on the selected background
         if background == 'snow':
             self.bounce_sound_2 = SoundLoader.load('cold.mp3')
+            self.bounce_sound_3 = SoundLoader.load('cold.mp3')
         elif background == 'forest':
+            self.bounce_sound_2 = SoundLoader.load('autumnsound.mp3')
             self.bounce_sound_3 = SoundLoader.load('autumnsound.mp3')
 
     def play_background_music(self, music_file):
