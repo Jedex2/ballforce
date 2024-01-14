@@ -3,7 +3,6 @@ from kivy.uix.widget import Widget
 from kivy.uix.image import Image
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
-from kivy.uix.slider import Slider
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Ellipse, Color
 from kivy.clock import Clock
@@ -110,20 +109,14 @@ class BallApp(App):
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 
         # Load background music
-        self.background_music = SoundLoader.load('background_music.mp3')
-        if self.background_music:
-            self.background_music.loop = True
-            self.background_music.play()
-
-        # Load sound effects for the game
+        self.background_music = None
         self.load_game_sounds()
 
         return root
-
     def load_game_sounds(self):
         # Load additional game sounds
-        self.bounce_sound_2 = SoundLoader.load('autumnsound.mp3')
-        self.bounce_sound_3 = SoundLoader.load('cold.mp3')
+        self.bounce_sound_2 = SoundLoader.load('cold.mp3')
+        self.bounce_sound_3 = SoundLoader.load('autumnsound.mp3')
 
     def show_skin_popup(self, instance):
         # Create a skin selection popup
@@ -193,18 +186,29 @@ class BallApp(App):
         if background_option == 'snow':
             self.background.source = 'snowweather.jpg'
             self.load_game_sounds_for_background('snow')
-        elif background_option == 'forest':  # Corrected condition
+            self.play_background_music('cold.mp3')
+        elif background_option == 'forest':
             self.background.source = 'forest.jpg'
             self.load_game_sounds_for_background('forest')
+            self.play_background_music('autumnsound.mp3')
 
     def load_game_sounds_for_background(self, background):
         # Load game sounds based on the selected background
         if background == 'snow':
-            self.bounce_sound_2 = SoundLoader.load('snow_bounce_sound.mp3')
-            self.bounce_sound_3 = SoundLoader.load('snow_bounce_sound_2.mp3')
+            self.bounce_sound_2 = SoundLoader.load('cold.mp3')
         elif background == 'forest':
-            self.bounce_sound_2 = SoundLoader.load('forest_bounce_sound.mp3')
-            self.bounce_sound_3 = SoundLoader.load('forest_bounce_sound_2.mp3')
+            self.bounce_sound_3 = SoundLoader.load('autumnsound.mp3')
+
+    def play_background_music(self, music_file):
+        # Stop the current background music if playing
+        if self.background_music:
+            self.background_music.stop()
+
+        # Load and play the new background music
+        self.background_music = SoundLoader.load(music_file)
+        if self.background_music:
+            self.background_music.loop = True
+            self.background_music.play()
 
 if __name__ == '__main__':
     BallApp().run()
