@@ -128,7 +128,7 @@ class BallApp(App):
             self.change_skin(value)
 
         skin_options = ['Ice Ball', 'forest Ball', 'Lava ball']
-        skin_images = ['Ice ball.jpg', 'forest ball.png', 'lava ball.png']
+        skin_images = ['ice_ball.jpg', 'forest_ball.jpg', 'lava_ball.jpg']
 
         skin_dropdown = DropDown()
 
@@ -149,9 +149,9 @@ class BallApp(App):
     def change_skin(self, skin_option):
         # Change ball appearance based on the selected option
         skin_images = {
-            'Ice ball.png': [0, 1, 1, 1],
-            'forest ball.png': [0, 1, 0, 1],
-            'lava ball.png': [0, 0, 1, 1]
+            'ice_ball.jpg': [0, 1, 1, 1],
+            'forest_ball.jpg': [0, 1, 0, 1],
+            'lava_ball.jpg': [0, 0, 1, 1]
         }
 
         skin_color = skin_images.get(skin_option, [0, 1, 1, 1])
