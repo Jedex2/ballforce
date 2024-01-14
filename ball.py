@@ -73,6 +73,8 @@ class Ball(Widget):
             self.ball.pos = (self.ball.pos[0], 0)
             self.velocity_y = -self.velocity_y * self.damping  # Bounce with damping
 
+
+
     def on_touch_move(self, touch):
         # Adjust the horizontal velocity based on the touch movement
         self.velocity_x = touch.dx / 2.5  # You can adjust the division factor for sensitivity
