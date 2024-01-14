@@ -109,7 +109,7 @@ class BallApp(App):
         root.add_widget(skin_button)
 
         # Schedule the update function to be called every 1/60 seconds (60 FPS)
-        Clock.schedule_interval(self.update, 1.0 / 60.0)
+        Clock.schedule_interval(self.update, 1.0 / 120.0)
 
         # Load background music
         self.background_music = None
